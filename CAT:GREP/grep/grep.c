@@ -5,8 +5,8 @@
 #include <regex.h>
 #include <locale.h>
 
-// 1) Регулярные выражения
-// 2) Простой grep
+// 1) Регулярные выражения V
+// 2) Простой grep V
 // 3) *1-2 флага
 
 FILE *open_file(char *name);
@@ -67,19 +67,58 @@ int main(int argc,char *argv[]){
     //main_func(argc, argv);
     regex_t regex;
     int reti;
-    reti = regcomp(&regex, argv[1], 0);
-    if (reti) {
-        fprintf(stderr, "Could not compile regex\n");
-        return 1;
-    }
     FILE *fd;
     char line[256];
     int j = argc - 1;
     fd = open_file(argv[j]);
-    fgets(line, sizeof(line), fd);
-    reti = regexec(&regex, line, 0, NULL, 0);
-    if (!reti) {
-        printf("%s", argv[1]);
+    int count = 0;
+    int rez;
+    /*if (reti) {
+        fprintf(stderr, "Could not compile regex\n");
+        return 1;
+    }*/
+    reti = regcomp(&regex, argv[2], 0);
+        if (reti) {
+            fprintf(stderr, "Could not compile regex\n");
+            return 1;
+        }
+    
+    while (fgets(line, sizeof(line), fd) != NULL) {
+        
+        while ((rez = getopt(argc, argv, "eivcln")) != -1) {
+            
+            switch (rez) {
+              case 'e':
+                break;
+              case 'i':
+                    reti = regcomp(&regex, argv[2], REG_ICASE);
+                    reti = regexec(&regex, line, 0, NULL, 0);
+                    if (!reti) {
+                        printf("%s", line);
+                    }
+                break;
+              case 'v':
+                break;
+              case 'c':
+                    reti = regexec(&regex, line, 0, NULL, 0);
+                    if (!reti) {
+                        count += 1;
+                    }
+                    printf("%d", count);
+                break;
+              case 'l':
+                break;
+              case 'n':
+                break;
+              default:
+                reti = regexec(&regex, line, 0, NULL, 0);
+                if (!reti) {
+                    printf("%s", line);
+                }
+                break;
+            }
+            
+          }
     }
     regfree(&regex);
     return 0;
