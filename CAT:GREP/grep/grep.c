@@ -24,54 +24,18 @@ FILE *open_file(char *name) {
 
 void close_file(FILE *fd) { fclose(fd); }
 
-/*void main_func(int argc, char *argv[]) {
-  int rez;
-    regex_t regex;
-       int reti;
-       reti = regcomp(&regex, "your_regex", 0);
-  FILE *fd;
-  int j = argc - 1;
-  fd = open_file(argv[j]);
-  int option_index = 0;
-  while ((line = fgetc(fd)) != EOF) {
-      while ((rez = getopt(argc, argv, "eivcln");) != -1) {
-          switch (rez) {
-            case 'e':
-              break;
-            case 'i':
-              break;
-            case 'v':
-              break;
-            case 'c':
-              break;
-            case 'l':
-              break;
-            case 'n':
-              break;
-            default:
-              break;
-          }
-        }
-    if(rez == -1 && line != EOF){
-              optind = 0;
-          }
-    if (line == '\0'){
-        continue;
-        }
-    printf("%c", line);
-  }
-  close_file(fd);
-  regfree(&regex);*/
-//}
 int main(int argc,char *argv[]){
     //main_func(argc, argv);
     regex_t regex;
     int reti;
+  
     FILE *fd;
     char line[256];
+   // char buf[256];
+    //char buf2[512];
     int j = argc - 1;
     fd = open_file(argv[j]);
-    int count = 0;
+    int count = 1;
     int rez;
     /*if (reti) {
         fprintf(stderr, "Could not compile regex\n");
@@ -89,12 +53,22 @@ int main(int argc,char *argv[]){
             
             switch (rez) {
               case 'e':
-                break;
+                  /*  reti = regcomp(&regex, argv[optind], 0);
+                    reti = regexec(&regex, line, 0, NULL, 0);
+                    optind += 1;
+                    if ((rez = getopt(argc, argv, "eivcln")) == 'e'){
+                        
+                    }
+                    if (!reti) {
+                        printf("%s", line);
+                    }
+                    break;*/
               case 'i':
-                    reti = regcomp(&regex, argv[2], REG_ICASE);
+                    reti = regcomp(&regex, argv[optind], REG_ICASE);
                     reti = regexec(&regex, line, 0, NULL, 0);
                     if (!reti) {
                         printf("%s", line);
+                        
                     }
                 break;
               case 'v':
@@ -104,11 +78,29 @@ int main(int argc,char *argv[]){
                     if (!reti) {
                         count += 1;
                     }
-                    printf("%d", count);
+                    snprintf(line, sizeof(line), "\r%d", count);
                 break;
               case 'l':
+                    reti = regcomp(&regex, argv[optind], 0);
+                    reti = regexec(&regex, line, 0, NULL, 0);
+                    if (!reti) {
+                        snprintf(line, sizeof(line), "%s", argv[j]);
+                    }else{
+                        for (unsigned long int i = 0; i < strlen(line); i++){
+                            line[i] = '\0';
+                        }
+                    }
                 break;
               case 'n':
+                    reti = regexec(&regex, line, 0, NULL, 0);
+                    count += 1;
+                    if (!reti) {
+                        printf("%d:", count);
+                    }else{
+                        for (unsigned long int i = 0; i < strlen(line); i++){
+                            line[i] = '\0';
+                        }
+                    }
                 break;
               default:
                 reti = regexec(&regex, line, 0, NULL, 0);
@@ -116,9 +108,12 @@ int main(int argc,char *argv[]){
                     printf("%s", line);
                 }
                 break;
+                
             }
             
           }
+        optind = 1;
+        printf("%s", line);
     }
     regfree(&regex);
     return 0;
