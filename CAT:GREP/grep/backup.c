@@ -36,7 +36,6 @@ int main(int argc,char *argv[]){
     int j = argc - 1;
     fd = open_file(argv[j]);
     int count = 0;
-    
     int rez;
     int flag = 1;
     while (fgets(line, sizeof(line), fd) != NULL) {
@@ -78,18 +77,16 @@ int main(int argc,char *argv[]){
                 case 'l':
                     reti = regcomp(&regex, argv[optind-1], 0);
                     reti = regexec(&regex, line, 0, NULL, 0);
-                   // fd = open_file(argv[optind]);
-                    fd = open_file(argv[optind]);
-                    if (!reti && count < 1) {
-                        count +=1;
-                        
-                        
+                    printf("%d", optind);
+                    if (!reti) {
                         //flag = 0;
                         //snprintf(line, sizeof(line), "%s", argv[j]);
                         printf("%s", argv[optind]);
+                        optind++;
+                        while()
                     }
-                    //fd = open_file(argv[optind+1]);
-                    optind += 1;
+                    optind+=1;
+
                     break;
                 case 'n':
                     reti = regexec(&regex, line, 0, NULL, 0);
@@ -102,9 +99,9 @@ int main(int argc,char *argv[]){
             }
         }
         optind = 1;
-        //if (rez == -1 && !reti){// не тестил
-          //  flag = 0;
-        //}
+        if (rez == -1 && !reti){// не тестил
+            flag = 0;
+        }
         if(!flag){
             printf("%s", line);
         }
@@ -114,3 +111,4 @@ int main(int argc,char *argv[]){
     regfree(&regex);
     return 0;
 }
+
