@@ -36,11 +36,14 @@ int main(int argc,char *argv[]){
     int j = argc - 1;
     fd = open_file(argv[j]);
     int count = 0;
+    int kk=1;
     int rez;
     int flag = 1;
+    int tmp = 0;
+    int lox = 0;
     while (fgets(line, sizeof(line), fd) != NULL) {
-        reti = regcomp(&regex, argv[1], 0);
-        reti = regexec(&regex, line, 0, NULL, 0);
+        //reti = regcomp(&regex, argv[1], 0);
+        //reti = regexec(&regex, line, 0, NULL, 0);
         while ((rez = getopt(argc, argv, "e:ivcl:n")) != -1) {
             reti = regcomp(&regex, argv[j], 0);
             reti = regexec(&regex, line, 0, NULL, 0);
@@ -75,18 +78,23 @@ int main(int argc,char *argv[]){
                     snprintf(line, sizeof(line), "\r%d", count);
                     break;
                 case 'l':
-                    reti = regcomp(&regex, argv[optind-1], 0);
-                    reti = regexec(&regex, line, 0, NULL, 0);
-                    printf("%d", optind);
-                    if (!reti) {
-                        //flag = 0;
-                        //snprintf(line, sizeof(line), "%s", argv[j]);
-                        printf("%s", argv[optind]);
-                        optind++;
-                        while()
+                    while (optind < argc){
+                        tmp = optind - kk;
+                        kk++;
+                        fd = open_file(argv[optind]);
+                        while (fgets(line, sizeof(line), fd) != NULL) {
+                            reti = regcomp(&regex, argv[tmp], 0);
+                            reti = regexec(&regex, line, 0, NULL, 0);
+                            if (!reti && lox == 0) {
+                                //flag = 0;
+                                //snprintf(line, sizeof(line), "%s", argv[optind]);
+                                printf("%s ", argv[optind]);
+                                lox = 1;
+                            }
+                        }
+                        lox = 0;
+                        optind ++;
                     }
-                    optind+=1;
-
                     break;
                 case 'n':
                     reti = regexec(&regex, line, 0, NULL, 0);
@@ -99,16 +107,17 @@ int main(int argc,char *argv[]){
             }
         }
         optind = 1;
-        if (rez == -1 && !reti){// не тестил
-            flag = 0;
-        }
+        //if (rez == -1 && !reti){// не тестил
+          //  flag = 0;
+        //}
         if(!flag){
             printf("%s", line);
         }
         
         flag = 1;
     }
+    close_file(fd);
     regfree(&regex);
+  //  regfree(&regex);
     return 0;
 }
-
