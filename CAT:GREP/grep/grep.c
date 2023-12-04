@@ -12,7 +12,7 @@
 // 5) обработать defalut V
 // 6) последний флаг
 // 7) тесты
-
+// 8) все что после шаблона - файл !!!!!!!!!!!
 FILE *open_file(char *name);
 void close_file(FILE *fd);
 void main_func(int argc, char *argv[]);
@@ -31,37 +31,39 @@ int main(int argc,char *argv[]){
    regex_t regex;
    int reti;
    FILE *fd;
-   char line[-1];
+   char line[256];
    int j = 0;
+    int k = 0;
    int count = 0;
    int rez;
    int flag = 1;
    int tmp = 1;
    int sem = 0;
-   int rez1 = 0;
-
    while ((rez = getopt(argc, argv, "e:ivcl:n")) != -1) {
-       while (optind +tmp< argc){
+       
+       while (optind + tmp< argc){
            if( rez == 'l' && !j ){
                tmp=0;
                j=1;
            }
-           if (rez == 'e' && !j){
+           if (rez == 'e' && !k ){
                tmp ++;
-               j = 1;
+               k = 1;
            }
            fd = open_file(argv[optind + tmp]);
-           printf("%c ", rez);
-           printf("%s\n ", argv[optind+tmp]);
+           //printf("%c ", rez);
+           //printf("%s\n", argv[optind+tmp]);
            
            while (fgets(line, sizeof(line), fd) != NULL) {
                reti = regcomp(&regex, argv[optind], 0);
                switch (rez) {
                   case 'e':
+                       //printf("scs");
+                      printf("%s ", argv[optind-1]);
                       reti = regcomp(&regex, argv[optind-1], 0);
                       reti = regexec(&regex, line, 0, NULL, 0);
                       if (!reti) {
-                          flag = 0;
+                          //flag = 0;
                       }
                       break;
                   case 'i':
@@ -113,7 +115,9 @@ int main(int argc,char *argv[]){
            }
            sem = 0;
            tmp++;
+           k=0;
        }
+       
    }
    return 0;
 }

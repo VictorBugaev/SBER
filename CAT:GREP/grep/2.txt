@@ -1,0 +1,5 @@
+a_test.txt:1:OLEG
+a_test.txt:6:OLEG
+b_test.txt:1:OLEG MONGOL 1337
+b_test.txt:2:MONGOL OLEG
+b_test.txt:8:OLEG
