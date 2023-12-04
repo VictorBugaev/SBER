@@ -1,14 +1,5 @@
-
-#include <ctype.h>
-#include <getopt.h>
-#include <locale.h>
-#include <regex.h>
-#include <stdio.h>
-#include <string.h>
-
-FILE *open_file(char *name);
-void close_file(FILE *fd);
-void main_func(int argc, char *argv[]);
+#define _POSIX_C_SOURCE 200809L
+#include "s21_grep.h"
 
 FILE *open_file(char *name) {
   FILE *fd;
@@ -28,31 +19,13 @@ int file_check(char *name) {
 }
 void close_file(FILE *fd) { fclose(fd); }
 
-int main(int argc, char *argv[]) {
+void main_func(int argc, char *argv[]) {
   regex_t regex;
-  int reti;
+  int reti, rez;
   FILE *fd;
-  char line[256];
-  int count = 0;
-  int rez;
-  int flag = 1;
-  int flag_n = 0;
+  char line[256], buf[512], comp_arg[256];
+  int flag = 1, flag_l = 0, flag_v= 0, flag_c= 0, mass_count = 0, comp_num = 0, count_c = 0, count_n = 0, count_l = 0, flag_l2=0;
   char *mass[256];
-  char buf[512];
-  int flag_l = 0;
-  int flag_v= 0;
-    int flag_c= 0;
-    int flag_e = 0;
-    int flag_i = 0;
-    int stop = 1;
-  int help = 0;
-  int mass_count = 0;
-    char comp_arg[256];
-    int comp_num = 0;
-    int count_c = 0;
-    int count_n = 0;
-    int count_l = 0;
-    
   for (int i = 0; i + optind < argc; i++) {
     if (file_check(argv[optind + i])) {
       mass[mass_count] = argv[optind + i];
@@ -70,7 +43,6 @@ int main(int argc, char *argv[]) {
       while ((rez = getopt(argc, argv, "e:ivcln")) != -1) {
         switch (rez) {
           case 'e':
-            flag_e = 1;
             snprintf(comp_arg, sizeof(comp_arg), "%s", optarg);
                 reti = regcomp(&regex, comp_arg, comp_num);
                 reti = regexec(&regex, line, 0, NULL, 0);
@@ -79,7 +51,6 @@ int main(int argc, char *argv[]) {
                 }
             break;
           case 'i':
-            flag_i = 1;
             comp_num = 2;
             snprintf(comp_arg, sizeof(comp_arg), "%s", argv[optind]);
             break;
@@ -99,24 +70,29 @@ int main(int argc, char *argv[]) {
             count_n += 1;
             snprintf(comp_arg, sizeof(comp_arg), "%s", argv[optind]);
             snprintf(buf, sizeof(buf), "%d:%s", count_n, line);
-            snprintf(line, sizeof(line), "%s", buf);
+            strcpy(line, buf);
             break;
+            default:
+                regfree(&regex);
+                break;
         }
       }
         if (line[strlen(line) - 1] != '\n') {
             strcat(line, "\n");
         }
         if (!flag && mass_count > 1 && !flag_l) {
-          snprintf(buf, sizeof(buf), "%s:%s", mass[i], line);
-          snprintf(line, sizeof(line), "%s", buf);
+        
+            snprintf(mass[i], strlen(mass[i])+1, "%s:", mass[i]);
+            snprintf(line, strlen(mass[i])+strlen(line), "%s%s", mass[i], line);
         }
-        //printf("%s ", comp_arg);
+    
         reti = regcomp(&regex, comp_arg, comp_num);
         reti = regexec(&regex, line, 0, NULL, 0);
         if (!reti && !flag_v) {
             flag = 0;
             count_l ++;
             count_c ++;
+            flag_l2 = 1;
         }
         if (flag_v && reti){
             flag = 0;
@@ -126,25 +102,33 @@ int main(int argc, char *argv[]) {
         if (flag_l || flag_c){
             flag = 1;
         }
+        if (flag_l && flag_c){
+            count_c = flag_l2;
+        }
         if (!flag) {
           printf("%s", line);
         }
-        if(flag_l && count_l > 0 && feof(fd)) printf("%s\n", mass[i]);
-        if (flag_c && feof(fd)) {
-            if (mass_count > 1){
-                printf("%s:", mass[i]);
-            }
-            printf("%d\n", count_c);
-        }
+        
         optind = 1;
         flag = 1;
     }
+    if (flag_c && feof(fd)) {
+        if (mass_count > 1){
+            printf("%s:", mass[i]);
+        }
+        printf("%d\n", count_c);
+    }
+    if(flag_l && count_l > 0 && feof(fd)) printf("%s\n", mass[i]);
     count_n = 0;
     count_c = 0;
     count_l = 0;
+    flag_l2 = 0;
     close_file(fd);
   }
   regfree(&regex);
-  return 0;
 }
 
+int main(int argc, char *argv[]){
+    main_func(argc, argv);
+    return 0;
+}
