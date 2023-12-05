@@ -3,18 +3,16 @@
 SUCCESS=0
 FAIL=0
 COUNTER=0
-RESULT=0
 DIFF_RES=""
 
 declare -a tests=(
-"s test_text_grep.txt VAR"
+"s test_0_grep.txt VAR"
 "for s21_grep.c s21_grep.h Makefile VAR"
 "for s21_grep.c VAR"
 "-e for -e ^int s21_grep.c s21_grep.h Makefile VAR"
 "-e for -e ^int s21_grep.c VAR"
 "-e regex -e ^print s21_grep.c VAR -f test_ptrn_grep.txt"
 "-e while -e void s21_grep.c Makefile VAR -f test_ptrn_grep.txt"
-"VAR no_file.txt"
 )
 
 declare -a extra=(
@@ -31,7 +29,7 @@ declare -a extra=(
 "-ne = -e out test_5_grep.txt"
 "-iv int test_5_grep.txt"
 "-in int test_5_grep.txt"
-"-c -l aboba test_1.txt test_5_grep.txt"
+"-c -l aboba test_1_grep.txt test_5_grep.txt"
 "-v test_1_grep.txt -e ank"
 "-noe ) test_5_grep.txt"
 "-l for test_1_grep.txt test_2_grep.txt"
@@ -47,19 +45,19 @@ declare -a extra=(
 testing()
 {
     t=$(echo $@ | sed "s/VAR/$var/")
-    leaks -quiet -atExit -- ./s21_grep $t > test_s21_grep.log
-    leak=$(grep -A100000 leaks test_s21_grep.log)
+    ./s21_grep $t > test_s21_grep.log
+    grep $t > test_sys_grep.log
+    DIFF_RES="$(diff -s test_s21_grep.log test_sys_grep.log)"
     (( COUNTER++ ))
-    if [[ $leak == *"0 leaks for 0 total leaked bytes"* ]]
+    if [ "$DIFF_RES" == "Files test_s21_grep.log and test_sys_grep.log are identical" ]
     then
       (( SUCCESS++ ))
-        echo "\033[31m$FAIL\033[0m/\033[32m$SUCCESS\033[0m/$COUNTER \033[32msuccess\033[0m grep $t"
+      echo "\033[31m$FAIL\033[0m/\033[32m$SUCCESS\033[0m/$COUNTER \033[32msuccess\033[0m grep $t"
     else
       (( FAIL++ ))
-        echo "\033[31m$FAIL\033[0m/\033[32m$SUCCESS\033[0m/$COUNTER \033[31mfail\033[0m grep $t"
-#        echo "$leak"
+      echo "\033[31m$FAIL\033[0m/\033[32m$SUCCESS\033[0m/$COUNTER \033[31mfail\033[0m grep $t"
     fi
-    rm test_s21_grep.log
+    rm test_s21_grep.log test_sys_grep.log
 }
 
 # специфические тесты

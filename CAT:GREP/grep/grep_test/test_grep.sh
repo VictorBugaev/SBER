@@ -9,10 +9,10 @@ declare -a flags=(
 "-c"
 "-l"
 "-n"
-#"-h"
-#"-s"
-#"-f"
-#"-o"
+"-h"
+"-s"
+"-f"
+"-o"
 )
 
 declare -a files=(

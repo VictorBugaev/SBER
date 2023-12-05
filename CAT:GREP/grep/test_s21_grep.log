@@ -1,2 +1,0 @@
-  for (int i = 0; i + optind < argc; i++) {
-  for (int i = 0; i < mass_count; i++) {

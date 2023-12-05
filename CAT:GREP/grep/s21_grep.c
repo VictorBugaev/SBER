@@ -11,11 +11,15 @@ FILE *open_file(char *name) {
 
 int file_check(char *name) {
   FILE *fd;
+    int f;
   if ((fd = fopen(name, "r")) == NULL) {
-    return 0;
+    f = 0;
+  }else{
+      f = 1;
+      fclose(fd);
   }
-  fclose(fd);
-  return 1;
+
+    return f;
 }
 void close_file(FILE *fd) { fclose(fd); }
 
@@ -26,28 +30,33 @@ void main_func(int argc, char *argv[]) {
   char line[256], buf[512], comp_arg[256];
   int flag = 1, flag_l = 0, flag_v= 0, flag_c= 0, mass_count = 0, comp_num = 0, count_c = 0, count_n = 0, count_l = 0, flag_l2=0;
   char *mass[256];
+    snprintf(comp_arg, sizeof(comp_arg), "%s", argv[1]);
   for (int i = 0; i + optind < argc; i++) {
     if (file_check(argv[optind + i])) {
       mass[mass_count] = argv[optind + i];
       mass_count++;
     }
   }
+
   for (int i = 0; i < mass_count; i++) {
     fd = open_file(mass[i]);
     while (fgets(line, sizeof(line), fd) != NULL) {
-      reti = regcomp(&regex, argv[1], 0);
-      reti = regexec(&regex, line, 0, NULL, 0);
-      if (!reti) {
-        flag = 0;
-      }
       while ((rez = getopt(argc, argv, "e:ivcln")) != -1) {
         switch (rez) {
           case 'e':
             snprintf(comp_arg, sizeof(comp_arg), "%s", optarg);
+                for(int j = 0; comp_arg[j]; j++){  // Экранирование символа /
+                        if(comp_arg[j] == '/'){
+                            comp_arg[j] = '\\';
+                            comp_arg[j+1] = '/';
+                        }
+                    }
                 reti = regcomp(&regex, comp_arg, comp_num);
                 reti = regexec(&regex, line, 0, NULL, 0);
                 if (!reti){
                     flag = 0;
+                }else{
+                    flag = 1;
                 }
             break;
           case 'i':
@@ -73,19 +82,16 @@ void main_func(int argc, char *argv[]) {
             strcpy(line, buf);
             break;
             default:
+                fclose(fd);
                 regfree(&regex);
                 break;
         }
       }
+        
+       
         if (line[strlen(line) - 1] != '\n') {
             strcat(line, "\n");
         }
-        if (!flag && mass_count > 1 && !flag_l) {
-        
-            snprintf(mass[i], strlen(mass[i])+1, "%s:", mass[i]);
-            snprintf(line, strlen(mass[i])+strlen(line), "%s%s", mass[i], line);
-        }
-    
         reti = regcomp(&regex, comp_arg, comp_num);
         reti = regexec(&regex, line, 0, NULL, 0);
         if (!reti && !flag_v) {
@@ -105,10 +111,13 @@ void main_func(int argc, char *argv[]) {
         if (flag_l && flag_c){
             count_c = flag_l2;
         }
+        if (!flag && mass_count > 1 && !flag_l) {
+            snprintf(buf, sizeof(buf), "%s:%s", mass[i], line);
+            strcpy(line, buf);
+        }
         if (!flag) {
           printf("%s", line);
         }
-        
         optind = 1;
         flag = 1;
     }
